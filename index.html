@@ -4,13 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>axom webcloner</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@vibrant/color@4.4.2/dist/vibrant.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-  <script src="linkclone.js"></script>
-  <script src="imageclone.js"></script>
-  <script src="main.js"></script>
 </head>
 <body>
 <div class="mainwrapper">
@@ -23,18 +20,18 @@
     <div id="linkpanel" class="panel">
       <div class="linkgroup">
         <input type="text" id="websiteurl" placeholder="https://example.com/article">
-        <button id="executelinkcopy" class="actionbutton">copy websites frontend</button>
+        <button id="executelinkcopy" class="actionbutton">clone web</button>
       </div>
-      <div class="filezone">axomic web cloner</div>
+      <div class="filezone">axom webcloner | copy any website </div>
     </div>
 
     <div id="imagepanel" style="display:none;" class="panel">
       <div class="filezone">
         <label>upload website screenshot (jpg, png, webp)</label>
         <input type="file" id="imagefileinput" accept="image/jpeg,image/png,image/webp">
-        <button id="executeimageextract" class="actionbutton" style="margin-top: 1rem;">clone from image</button>
+        <button id="executeimageextract" class="actionbutton" style="margin-top: 1rem;">clone by image</button>
       </div>
-      <div class="filezone" style="background:#fef7e0;">extracts text, color blocks, gradients, shapes (badic)</div>
+      <div class="filezone" style="background:#fef7e0;">in "by images",it extracts text, color blocks, gradients, shapes (basic)</div>
     </div>
   </div>
 
@@ -45,7 +42,7 @@
       <button id="codeviewbtn" class="togglebtn">source code</button>
     </div>
     <div id="outputzone" class="outputarea">
-      <div class="infomessage">select mode and run clone</div>
+      <div class="infomessage">select mode and run copy</div>
     </div>
     <div class="buttonbar">
       <button id="copyoutputbtn" class="actionbutton">copy output</button>
@@ -53,5 +50,8 @@
     </div>
   </div>
 </div>
+<script src="linkclone.js"></script>
+<script src="imageclone.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
