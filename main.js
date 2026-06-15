@@ -3,6 +3,7 @@
     let currentmode = 'link';
     let currenthtml = '';
     let currentview = 'preview';
+    let currentshareurl = '';
 
     let linkmodebtn = document.getElementById('linkmodebtn');
     let imagemodebtn = document.getElementById('imagemodebtn');
@@ -15,6 +16,9 @@
     let previewoutputbtn = document.getElementById('previewoutputbtn');
     let previewviewbtn = document.getElementById('previewviewbtn');
     let codeviewbtn = document.getElementById('codeviewbtn');
+    let sharezone = document.getElementById('sharezone');
+    let sharelinkinput = document.getElementById('sharelinkinput');
+    let copysharebtn = document.getElementById('copysharebtn');
 
     function setmode(mode){
       currentmode = mode;
@@ -32,6 +36,7 @@
       outputzone.innerHTML = '<div class="infomessage">ready for ' + mode + ' mode</div>';
       currenthtml = '';
       currentview = 'preview';
+      sharezone.style.display = 'none';
       previewviewbtn.classList.add('activeview');
       codeviewbtn.classList.remove('activeview');
     }
@@ -42,10 +47,25 @@
     function showerror(msg){
       outputzone.innerHTML = '<div class="infomessage" style="color:#b91c1c;">error: ' + msg + '</div>';
       currenthtml = '';
+      sharezone.style.display = 'none';
     }
 
     function showloading(){
       outputzone.innerHTML = '<div class="infomessage">processing, please wait...</div>';
+      sharezone.style.display = 'none';
+    }
+
+    function updatesharelink(sourceurl){
+      if(sourceurl && sourceurl.trim() !== ''){
+        let baseurl = window.location.href.split('#')[0];
+        let shareurl = baseurl + '#' + encodeURIComponent(sourceurl);
+        currentshareurl = shareurl;
+        sharelinkinput.value = shareurl;
+        sharezone.style.display = 'flex';
+      } else {
+        sharezone.style.display = 'none';
+        currentshareurl = '';
+      }
     }
 
     function rendercurrentview(){
@@ -106,6 +126,27 @@
       }).catch(()=>showerror('copy failed'));
     }
 
+    function copysharelink(){
+      if(!currentshareurl){
+        showerror('no share link available');
+        return;
+      }
+      navigator.clipboard.writeText(currentshareurl).then(() => {
+        let msg = document.createElement('div');
+        msg.style.position = 'fixed';
+        msg.style.bottom = '20px';
+        msg.style.right = '20px';
+        msg.style.backgroundColor = '#1e3a5f';
+        msg.style.color = 'white';
+        msg.style.padding = '10px 18px';
+        msg.style.borderRadius = '40px';
+        msg.style.fontSize = '0.85rem';
+        msg.innerText = 'share link copied';
+        document.body.appendChild(msg);
+        setTimeout(()=>msg.remove(), 2000);
+      }).catch(()=>showerror('copy failed'));
+    }
+
     function previewoutput(){
       if(!currenthtml){
         showerror('no content to preview');
@@ -121,9 +162,14 @@
     }
 
     window.app = {
-      setcurrenthtml: function(html){
+      setcurrenthtml: function(html, sourceurl){
         currenthtml = html;
         rendercurrentview();
+        if(sourceurl && sourceurl.trim() !== ''){
+          updatesharelink(sourceurl);
+        } else {
+          sharezone.style.display = 'none';
+        }
       },
       showerror: showerror,
       showloading: showloading
@@ -135,8 +181,25 @@
     previewoutputbtn.addEventListener('click', previewoutput);
     previewviewbtn.addEventListener('click', () => setview('preview'));
     codeviewbtn.addEventListener('click', () => setview('code'));
+    if(copysharebtn) copysharebtn.addEventListener('click', copysharelink);
+
+    function handlehash(){
+      let hash = window.location.hash.substring(1);
+      if(hash && hash.trim() !== ''){
+        let decoded = decodeURIComponent(hash);
+        let urlinput = document.getElementById('websiteurl');
+        if(urlinput){
+          urlinput.value = decoded;
+          setmode('link');
+          setTimeout(() => {
+            if(window.linkcloneprocess) window.linkcloneprocess();
+          }, 100);
+        }
+      }
+    }
 
     setmode('link');
+    handlehash();
   }
 
   if(document.readyState === 'loading'){
