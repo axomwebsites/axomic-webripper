@@ -94,7 +94,7 @@
     try{
       let rawhtml = await fetchwithfallback(url);
       let fixedhtml = repairhtmlkeepjs(rawhtml, url);
-      window.app.setcurrenthtml(fixedhtml);
+      window.app.setcurrenthtml(fixedhtml, url);
     } catch(err){
       window.app.showerror('copy failed after multiple attempts: ' + err.message);
     }
