@@ -20,9 +20,9 @@
     <div id="linkpanel" class="panel">
       <div class="linkgroup">
         <input type="text" id="websiteurl" placeholder="https://example.com/article">
-        <button id="executelinkcopy" class="actionbutton">clone web</button>
+        <button id="executelinkcopy" class="actionbutton">Clone Web</button>
       </div>
-      <div class="filezone">axom webcloner | copy any website </div>
+      <div class="filezone">axom webcloner | clone website's frontend</div>
     </div>
 
     <div id="imagepanel" style="display:none;" class="panel">
@@ -31,7 +31,7 @@
         <input type="file" id="imagefileinput" accept="image/jpeg,image/png,image/webp">
         <button id="executeimageextract" class="actionbutton" style="margin-top: 1rem;">clone by image</button>
       </div>
-      <div class="filezone" style="background:#fef7e0;">in "by images",it extracts text, color blocks, gradients, shapes (basic)</div>
+      <div class="filezone" style="background:#fef7e0;">extracts text, color blocks, gradients, shapes (in by image) </div>
     </div>
   </div>
 
@@ -43,6 +43,11 @@
     </div>
     <div id="outputzone" class="outputarea">
       <div class="infomessage">select mode and run copy</div>
+    </div>
+    <div class="sharezone" id="sharezone" style="display:none;">
+      <span class="sharelabel">share this clone:</span>
+      <input type="text" id="sharelinkinput" readonly class="shareinput">
+      <button id="copysharebtn" class="actionbutton smallbtn">copy link</button>
     </div>
     <div class="buttonbar">
       <button id="copyoutputbtn" class="actionbutton">copy output</button>
