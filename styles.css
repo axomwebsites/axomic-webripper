@@ -82,6 +82,10 @@ body {
   transition: 0.2s;
   font-family: inherit;
 }
+.actionbutton.smallbtn {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+}
 .actionbutton:hover {
   background: #1e4682;
   transform: scale(0.97);
@@ -154,4 +158,27 @@ iframe {
   padding: 2rem;
   text-align: center;
   color: #6f7c91;
+}
+.sharezone {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2eaf1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+}
+.sharelabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #2c3e66;
+}
+.shareinput {
+  flex: 3;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #cbdde9;
+  border-radius: 1.5rem;
+  font-size: 0.85rem;
+  background: #f8fafc;
+  font-family: monospace;
 }
