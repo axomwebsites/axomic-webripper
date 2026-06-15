@@ -181,10 +181,10 @@ ${texthtml}
     window.app.showloading();
     try{
       let generated = await reconstructfromimage(file);
-      window.app.setcurrenthtml(generated);
+      window.app.setcurrenthtml(generated, null);
     } catch(err){
       console.error(err);
-      window.app.showerror('reconstruction failed: ' + err.message);
+      window.app.showerror('clone failed: ' + err.message);
     }
   };
 })();
