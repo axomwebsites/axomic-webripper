@@ -1,88 +1,105 @@
 (function(){
-  let proxylist = [
-    async (url) => {
-      let proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-      let resp = await fetch(proxy);
-      if(!resp.ok) throw new Error('allorigins failed');
-      return await resp.text();
-    },
-    async (url) => {
-      let proxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
-      let resp = await fetch(proxy);
-      if(!resp.ok) throw new Error('corsproxy.io failed');
-      return await resp.text();
-    },
-    async (url) => {
-      let proxy = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url);
-      let resp = await fetch(proxy);
-      if(!resp.ok) throw new Error('codetabs failed');
-      return await resp.text();
-    },
-    async (url) => {
-      let proxy = 'https://thingproxy.freeboard.io/fetch/' + encodeURIComponent(url);
-      let resp = await fetch(proxy);
-      if(!resp.ok) throw new Error('thingproxy failed');
-      return await resp.text();
-    },
-    async (url) => {
-      let proxy = 'https://cors-anywhere.herokuapp.com/' + url;
-      let resp = await fetch(proxy);
-      if(!resp.ok) throw new Error('corsanywhere failed');
-      return await resp.text();
+  async function fetchwithproxy(url, settings){
+    let finalurl = url;
+    if(settings.proxy && settings.proxy.trim()!==''){
+      finalurl = settings.proxy + encodeURIComponent(url);
     }
-  ];
-
-  async function fetchwithfallback(url){
-    for(let i=0; i<proxylist.length; i++){
-      try{
-        let html = await proxylist[i](url);
-        if(html && html.length > 100) return html;
-      } catch(e){
-        continue;
-      }
-    }
-    throw new Error('all proxy methods failed');
+    let headers = settings.headers || {};
+    let resp = await fetch(finalurl, { headers });
+    if(!resp.ok) throw new Error('fetch failed');
+    return await resp.text();
   }
-
-  function repairhtmlkeepjs(htmlstring, baseurl){
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(htmlstring, 'text/html');
+  async function fetchblob(url, settings){
+    let finalurl = url;
+    if(settings.proxy && settings.proxy.trim()!==''){
+      finalurl = settings.proxy + encodeURIComponent(url);
+    }
+    let headers = settings.headers || {};
+    let resp = await fetch(finalurl, { headers });
+    if(!resp.ok) throw new Error('fetch blob failed');
+    return await resp.blob();
+  }
+  function getbase64(blob){
+    return new Promise((resolve, reject) => {
+      let reader = new FileReader();
+      reader.onload = ()=>resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+  async function clonefullsite(url, settings){
+    let html = await fetchwithproxy(url, settings);
+    let doc = new DOMParser().parseFromString(html, 'text/html');
     let base = doc.createElement('base');
-    base.setAttribute('href', baseurl);
+    base.setAttribute('href', url);
     doc.head.prepend(base);
-    let allimages = doc.querySelectorAll('img');
-    for(let img of allimages){
-      if(img.src && !img.src.startsWith('data:') && !img.src.startsWith('blob:')){
+    let imgs = doc.querySelectorAll('img');
+    for(let img of imgs){
+      if(img.src && !img.src.startsWith('data:')){
         try{
-          new URL(img.src);
-        } catch(e){
-          if(img.getAttribute('src')) img.src = new URL(img.getAttribute('src'), baseurl).href;
-        }
+          let absurl = new URL(img.src, url).href;
+          let blob = await fetchblob(absurl, settings);
+          let b64 = await getbase64(blob);
+          img.src = b64;
+        } catch(e){}
       }
     }
-    let stylelinks = doc.querySelectorAll('link[rel="stylesheet"]');
-    for(let link of stylelinks){
+    let styles = doc.querySelectorAll('link[rel="stylesheet"]');
+    for(let link of styles){
       if(link.href){
         try{
-          new URL(link.href);
-        } catch(e){
-          if(link.getAttribute('href')) link.href = new URL(link.getAttribute('href'), baseurl).href;
-        }
+          let absurl = new URL(link.href, url).href;
+          let css = await fetchwithproxy(absurl, settings);
+          let style = doc.createElement('style');
+          style.textContent = css;
+          link.replaceWith(style);
+        } catch(e){}
       }
     }
-    let allscripts = doc.querySelectorAll('script');
-    for(let script of allscripts){
-      if(script.src){
+    let scripts = doc.querySelectorAll('script[src]');
+    for(let scr of scripts){
+      if(scr.src){
         try{
-          new URL(script.src);
-        } catch(e){
-          if(script.getAttribute('src')) script.src = new URL(script.getAttribute('src'), baseurl).href;
+          let absurl = new URL(scr.src, url).href;
+          let js = await fetchwithproxy(absurl, settings);
+          let newscr = doc.createElement('script');
+          newscr.textContent = js;
+          scr.replaceWith(newscr);
+        } catch(e){}
+      }
+    }
+    let fontlinks = doc.querySelectorAll('link[href*="fonts.googleapis.com"]');
+    for(let link of fontlinks){
+      try{
+        let absurl = new URL(link.href, url).href;
+        let css = await fetchwithproxy(absurl, settings);
+        let style = doc.createElement('style');
+        style.textContent = css;
+        link.replaceWith(style);
+      } catch(e){}
+    }
+    let allstyles = doc.querySelectorAll('[style]');
+    for(let el of allstyles){
+      let style = el.getAttribute('style');
+      let urls = style.match(/url\(['"]?([^'"()]+)['"]?\)/g);
+      if(urls){
+        for(let u of urls){
+          let match = u.match(/url\(['"]?([^'"()]+)['"]?\)/);
+          if(match){
+            let rawurl = match[1];
+            try{
+              let absurl = new URL(rawurl, url).href;
+              let blob = await fetchblob(absurl, settings);
+              let b64 = await getbase64(blob);
+              style = style.replace(rawurl, b64);
+            } catch(e){}
+          }
         }
+        el.setAttribute('style', style);
       }
     }
     return '<!DOCTYPE html>' + doc.documentElement.outerHTML;
   }
-
   window.linkcloneprocess = async function(){
     let url = document.getElementById('websiteurl').value.trim();
     if(!url){
@@ -91,12 +108,12 @@
     }
     if(!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
     window.app.showloading();
+    let settings = window.settings ? window.settings.get() : { proxy: '', headers: {}, cookies: {} };
     try{
-      let rawhtml = await fetchwithfallback(url);
-      let fixedhtml = repairhtmlkeepjs(rawhtml, url);
-      window.app.setcurrenthtml(fixedhtml, url);
+      let html = await clonefullsite(url, settings);
+      window.app.setcurrenthtml(html, url);
     } catch(err){
-      window.app.showerror('copy failed after multiple attempts: ' + err.message);
+      window.app.showerror('clone failed: '+err.message);
     }
   };
 })();
