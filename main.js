@@ -1,210 +1,205 @@
 (function(){
-  function init(){
-    let currentmode = 'link';
-    let currenthtml = '';
-    let currentview = 'preview';
-    let currentshareurl = '';
-
-    let linkmodebtn = document.getElementById('linkmodebtn');
-    let imagemodebtn = document.getElementById('imagemodebtn');
-    let linkpanel = document.getElementById('linkpanel');
-    let imagepanel = document.getElementById('imagepanel');
-    let outputzone = document.getElementById('outputzone');
-    let executelinkcopy = document.getElementById('executelinkcopy');
-    let executeimageextract = document.getElementById('executeimageextract');
-    let copyoutputbtn = document.getElementById('copyoutputbtn');
-    let previewoutputbtn = document.getElementById('previewoutputbtn');
-    let previewviewbtn = document.getElementById('previewviewbtn');
-    let codeviewbtn = document.getElementById('codeviewbtn');
-    let sharezone = document.getElementById('sharezone');
-    let sharelinkinput = document.getElementById('sharelinkinput');
-    let copysharebtn = document.getElementById('copysharebtn');
-
-    function setmode(mode){
-      currentmode = mode;
-      if(mode === 'link'){
-        linkmodebtn.classList.add('active');
-        imagemodebtn.classList.remove('active');
-        linkpanel.style.display = 'flex';
-        imagepanel.style.display = 'none';
-      } else {
-        imagemodebtn.classList.add('active');
-        linkmodebtn.classList.remove('active');
-        linkpanel.style.display = 'none';
-        imagepanel.style.display = 'flex';
+  let currentmode = 'link';
+  let currenthtml = '';
+  let currentview = 'preview';
+  const elements = {
+    linkmodebtn: document.getElementById('linkmodebtn'),
+    imagemodebtn: document.getElementById('imagemodebtn'),
+    linkpanel: document.getElementById('linkpanel'),
+    imagepanel: document.getElementById('imagepanel'),
+    outputzone: document.getElementById('outputzone'),
+    executelinkcopy: document.getElementById('executelinkcopy'),
+    executeimageextract: document.getElementById('executeimageextract'),
+    copyoutputbtn: document.getElementById('copyoutputbtn'),
+    previewoutputbtn: document.getElementById('previewoutputbtn'),
+    previewviewbtn: document.getElementById('previewviewbtn'),
+    codeviewbtn: document.getElementById('codeviewbtn'),
+    editorviewbtn: document.getElementById('editorviewbtn'),
+    sharezone: document.getElementById('sharezone'),
+    sharelinkinput: document.getElementById('sharelinkinput'),
+    copysharebtn: document.getElementById('copysharebtn'),
+    darkmodebtn: document.getElementById('darkmodebtn'),
+    historytogglebtn: document.getElementById('historytogglebtn'),
+    settingstogglebtn: document.getElementById('settingstogglebtn'),
+    historypanel: document.getElementById('historypanel'),
+    advancedoptions: document.getElementById('advancedoptions'),
+    proxyinput: document.getElementById('proxyinput'),
+    headersinput: document.getElementById('headersinput'),
+    cookiesinput: document.getElementById('cookiesinput'),
+    saveadvancedbtn: document.getElementById('saveadvancedbtn'),
+    exportbtn: document.getElementById('exportbtn'),
+    deploybtn: document.getElementById('deploybtn'),
+    historylist: document.getElementById('historylist'),
+    clearhistorybtn: document.getElementById('clearhistorybtn'),
+    codeeditor: document.getElementById('codeeditor'),
+    minifybtn: document.getElementById('minifybtn'),
+    beautifybtn: document.getElementById('beautifybtn'),
+    linecount: document.getElementById('linecount')
+  };
+  function setmode(mode){
+    currentmode = mode;
+    if(mode==='link'){
+      elements.linkmodebtn.classList.add('active');
+      elements.imagemodebtn.classList.remove('active');
+      elements.linkpanel.style.display = 'flex';
+      elements.imagepanel.style.display = 'none';
+    } else {
+      elements.imagemodebtn.classList.add('active');
+      elements.linkmodebtn.classList.remove('active');
+      elements.linkpanel.style.display = 'none';
+      elements.imagepanel.style.display = 'flex';
+    }
+    elements.outputzone.innerHTML = '<div class="infomessage">ready for '+mode+' mode</div>';
+    currenthtml = '';
+    currentview = 'preview';
+    setview('preview');
+  }
+  elements.linkmodebtn.addEventListener('click', ()=>setmode('link'));
+  elements.imagemodebtn.addEventListener('click', ()=>setmode('images'));
+  function showerror(msg){
+    elements.outputzone.innerHTML = '<div class="infomessage" style="color:#b91c1c;">error: '+msg+'</div>';
+    currenthtml = '';
+    elements.sharezone.style.display = 'none';
+  }
+  function showloading(){
+    elements.outputzone.innerHTML = '<div class="infomessage">processing...</div>';
+    elements.sharezone.style.display = 'none';
+  }
+  function setview(view){
+    currentview = view;
+    document.querySelectorAll('.togglebtn').forEach(b=>b.classList.remove('activeview'));
+    if(view==='preview'){
+      elements.previewviewbtn.classList.add('activeview');
+      elements.outputzone.style.display = 'block';
+      document.getElementById('editorcontainer').style.display = 'none';
+    } else if(view==='code'){
+      elements.codeviewbtn.classList.add('activeview');
+      elements.outputzone.style.display = 'block';
+      document.getElementById('editorcontainer').style.display = 'none';
+    } else if(view==='editor'){
+      elements.editorviewbtn.classList.add('activeview');
+      elements.outputzone.style.display = 'none';
+      document.getElementById('editorcontainer').style.display = 'block';
+      if(currenthtml){
+        elements.codeeditor.value = currenthtml;
+        updateeditor();
       }
-      outputzone.innerHTML = '<div class="infomessage">ready for ' + mode + ' mode</div>';
-      currenthtml = '';
-      currentview = 'preview';
-      sharezone.style.display = 'none';
-      previewviewbtn.classList.add('activeview');
-      codeviewbtn.classList.remove('activeview');
     }
-
-    linkmodebtn.addEventListener('click', () => setmode('link'));
-    imagemodebtn.addEventListener('click', () => setmode('images'));
-
-    function showerror(msg){
-      outputzone.innerHTML = '<div class="infomessage" style="color:#b91c1c;">error: ' + msg + '</div>';
-      currenthtml = '';
-      sharezone.style.display = 'none';
+    if(currenthtml && view!=='editor') rendercurrentview();
+  }
+  function rendercurrentview(){
+    if(!currenthtml){
+      elements.outputzone.innerHTML = '<div class="infomessage">no content</div>';
+      return;
     }
-
-    function showloading(){
-      outputzone.innerHTML = '<div class="infomessage">processing, please wait...</div>';
-      sharezone.style.display = 'none';
+    if(currentview==='preview'){
+      let iframe = document.createElement('iframe');
+      iframe.srcdoc = currenthtml;
+      iframe.style.width = '100%';
+      iframe.style.height = '520px';
+      iframe.style.border = 'none';
+      iframe.style.borderRadius = '0.8rem';
+      elements.outputzone.innerHTML = '';
+      elements.outputzone.appendChild(iframe);
+    } else if(currentview==='code'){
+      let codeblock = document.createElement('pre');
+      codeblock.className = 'codeblock';
+      codeblock.textContent = currenthtml;
+      elements.outputzone.innerHTML = '';
+      elements.outputzone.appendChild(codeblock);
     }
-
-    function updatesharelink(sourceurl){
-      if(sourceurl && sourceurl.trim() !== ''){
+  }
+  function updateeditor(){
+    let val = elements.codeeditor.value;
+    let lines = val.split('\n').length;
+    elements.linecount.textContent = 'lines: '+lines;
+  }
+  elements.previewviewbtn.addEventListener('click', ()=>setview('preview'));
+  elements.codeviewbtn.addEventListener('click', ()=>setview('code'));
+  elements.editorviewbtn.addEventListener('click', ()=>setview('editor'));
+  elements.codeeditor.addEventListener('input', updateeditor);
+  window.app = {
+    setcurrenthtml: function(html, sourceurl){
+      currenthtml = html;
+      if(currentview!=='editor') rendercurrentview();
+      if(currentview==='editor'){
+        elements.codeeditor.value = html;
+        updateeditor();
+      }
+      if(sourceurl && sourceurl.trim()!==''){
         let baseurl = window.location.href.split('#')[0];
         let shareurl = baseurl + '#' + encodeURIComponent(sourceurl);
-        currentshareurl = shareurl;
-        sharelinkinput.value = shareurl;
-        sharezone.style.display = 'flex';
+        elements.sharelinkinput.value = shareurl;
+        elements.sharezone.style.display = 'flex';
+        window.history.add(sourceurl, html);
       } else {
-        sharezone.style.display = 'none';
-        currentshareurl = '';
+        elements.sharezone.style.display = 'none';
       }
-    }
-
-    function rendercurrentview(){
-      if(!currenthtml){
-        outputzone.innerHTML = '<div class="infomessage">no content available, run copy first</div>';
-        return;
-      }
-      if(currentview === 'preview'){
-        let iframeraw = document.createElement('iframe');
-        iframeraw.srcdoc = currenthtml;
-        iframeraw.style.width = '100%';
-        iframeraw.style.height = '520px';
-        iframeraw.style.border = 'none';
-        iframeraw.style.borderRadius = '0.8rem';
-        outputzone.innerHTML = '';
-        outputzone.appendChild(iframeraw);
-      } else {
-        let codeblock = document.createElement('pre');
-        codeblock.className = 'codeblock';
-        codeblock.textContent = currenthtml;
-        outputzone.innerHTML = '';
-        outputzone.appendChild(codeblock);
-      }
-    }
-
-    function setview(view){
-      currentview = view;
-      if(view === 'preview'){
-        previewviewbtn.classList.add('activeview');
-        codeviewbtn.classList.remove('activeview');
-      } else {
-        codeviewbtn.classList.add('activeview');
-        previewviewbtn.classList.remove('activeview');
-      }
-      if(currenthtml){
-        rendercurrentview();
-      }
-    }
-
-    function copyoutput(){
-      if(!currenthtml){
-        showerror('nothing to copy, run copy operation first');
-        return;
-      }
-      navigator.clipboard.writeText(currenthtml).then(() => {
-        let msg = document.createElement('div');
-        msg.style.position = 'fixed';
-        msg.style.bottom = '20px';
-        msg.style.right = '20px';
-        msg.style.backgroundColor = '#1e3a5f';
-        msg.style.color = 'white';
-        msg.style.padding = '10px 18px';
-        msg.style.borderRadius = '40px';
-        msg.style.fontSize = '0.85rem';
-        msg.innerText = 'copied to clipboard';
-        document.body.appendChild(msg);
-        setTimeout(()=>msg.remove(), 2000);
-      }).catch(()=>showerror('copy failed'));
-    }
-
-    function copysharelink(){
-      if(!currentshareurl){
-        showerror('no share link available');
-        return;
-      }
-      navigator.clipboard.writeText(currentshareurl).then(() => {
-        let msg = document.createElement('div');
-        msg.style.position = 'fixed';
-        msg.style.bottom = '20px';
-        msg.style.right = '20px';
-        msg.style.backgroundColor = '#1e3a5f';
-        msg.style.color = 'white';
-        msg.style.padding = '10px 18px';
-        msg.style.borderRadius = '40px';
-        msg.style.fontSize = '0.85rem';
-        msg.innerText = 'share link copied';
-        document.body.appendChild(msg);
-        setTimeout(()=>msg.remove(), 2000);
-      }).catch(()=>showerror('copy failed'));
-    }
-
-    function previewoutput(){
-      if(!currenthtml){
-        showerror('no content to preview');
-        return;
-      }
-      let win = window.open();
-      if(win){
-        win.document.write(currenthtml);
-        win.document.close();
-      } else {
-        showerror('popup blocked, allow popups for preview');
-      }
-    }
-
-    window.app = {
-      setcurrenthtml: function(html, sourceurl){
-        currenthtml = html;
-        rendercurrentview();
-        if(sourceurl && sourceurl.trim() !== ''){
-          updatesharelink(sourceurl);
-        } else {
-          sharezone.style.display = 'none';
-        }
-      },
-      showerror: showerror,
-      showloading: showloading
-    };
-
-    executelinkcopy.addEventListener('click', () => { if(currentmode === 'link') window.linkcloneprocess(); });
-    executeimageextract.addEventListener('click', () => { if(currentmode === 'images') window.imagecloneprocess(); });
-    copyoutputbtn.addEventListener('click', copyoutput);
-    previewoutputbtn.addEventListener('click', previewoutput);
-    previewviewbtn.addEventListener('click', () => setview('preview'));
-    codeviewbtn.addEventListener('click', () => setview('code'));
-    if(copysharebtn) copysharebtn.addEventListener('click', copysharelink);
-
-    function handlehash(){
-      let hash = window.location.hash.substring(1);
-      if(hash && hash.trim() !== ''){
-        let decoded = decodeURIComponent(hash);
-        let urlinput = document.getElementById('websiteurl');
-        if(urlinput){
-          urlinput.value = decoded;
-          setmode('link');
-          setTimeout(() => {
-            if(window.linkcloneprocess) window.linkcloneprocess();
-          }, 100);
-        }
-      }
-    }
-
-    setmode('link');
-    handlehash();
-  }
-
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+    },
+    showerror: showerror,
+    showloading: showloading,
+    getcurrenthtml: function(){ return currenthtml; }
+  };
+  elements.copyoutputbtn.addEventListener('click', ()=>{
+    if(!currenthtml){ showerror('nothing to copy'); return; }
+    navigator.clipboard.writeText(currenthtml).then(()=>{ alert('copied'); });
+  });
+  elements.previewoutputbtn.addEventListener('click', ()=>{
+    if(!currenthtml){ showerror('no content'); return; }
+    let win = window.open();
+    if(win){ win.document.write(currenthtml); win.document.close(); }
+    else showerror('popup blocked');
+  });
+  elements.executelinkcopy.addEventListener('click', ()=>{
+    if(currentmode==='link') window.linkcloneprocess();
+  });
+  elements.executeimageextract.addEventListener('click', ()=>{
+    if(currentmode==='images') window.imagecloneprocess();
+  });
+  let darkmode = localStorage.getItem('darkmode')==='true';
+  function applytheme(){ document.body.classList.toggle('dark', darkmode); }
+  elements.darkmodebtn.addEventListener('click', ()=>{
+    darkmode = !darkmode;
+    localStorage.setItem('darkmode', darkmode);
+    applytheme();
+  });
+  applytheme();
+  elements.historytogglebtn.addEventListener('click', ()=>{
+    let panel = elements.historypanel;
+    panel.style.display = panel.style.display==='none' ? 'block' : 'none';
+    if(panel.style.display==='block') window.history.render(elements.historylist);
+  });
+  elements.clearhistorybtn.addEventListener('click', ()=>{
+    window.history.clear();
+    elements.historypanel.style.display = 'none';
+  });
+  elements.settingstogglebtn.addEventListener('click', ()=>{
+    let adv = elements.advancedoptions;
+    adv.style.display = adv.style.display==='none' ? 'block' : 'none';
+  });
+  elements.saveadvancedbtn.addEventListener('click', ()=>{
+    let proxy = elements.proxyinput.value.trim();
+    let headers = {};
+    let cookies = {};
+    try{ headers = JSON.parse(elements.headersinput.value || '{}'); } catch(e){}
+    try{ cookies = JSON.parse(elements.cookiesinput.value || '{}'); } catch(e){}
+    window.settings.save({proxy, headers, cookies});
+    alert('settings saved');
+  });
+  elements.exportbtn.addEventListener('click', ()=>{
+    if(!currenthtml){ showerror('nothing to export'); return; }
+    let blob = new Blob([currenthtml], {type:'text/html'});
+    let a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'clone.html';
+    a.click();
+  });
+  elements.deploybtn.addEventListener('click', ()=>{
+    alert('deploy via netlify/vercel api not implemented, but you can export and host manually');
+  });
+  document.addEventListener('DOMContentLoaded', ()=>{
+    if(window.history) window.history.init();
+  });
+  if(window.settings) window.settings.load();
+  setmode('link');
 })();
