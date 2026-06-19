@@ -1,62 +1,113 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>axom webcloner</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>axomic webripper</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@vibrant/color@4.4.2/dist/vibrant.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchtags.min.js"></script>
 </head>
 <body>
-<div class="mainwrapper">
-  <div class="card">
-    <div class="moderow">
-      <button id="linkmodebtn" class="modebutton active">by link</button>
-      <button id="imagemodebtn" class="modebutton">by images</button>
+<div class="app">
+  <header class="toolbar">
+    <h1>axomic webripper</h1>
+    <div class="controls">
+      <button id="darkmodebtn" class="iconbtn">🌙</button>
+      <button id="historytogglebtn" class="iconbtn">📋</button>
+      <button id="settingstogglebtn" class="iconbtn">⚙️</button>
+    </div>
+  </header>
+
+  <div class="mainrow">
+    <div class="panel left">
+      <div class="moderow">
+        <button id="linkmodebtn" class="modebutton active">by link</button>
+        <button id="imagemodebtn" class="modebutton">by images</button>
+      </div>
+
+      <div id="linkpanel" class="panel">
+        <div class="linkgroup">
+          <input type="text" id="websiteurl" placeholder="https://example.com">
+          <button id="executelinkcopy" class="actionbutton">rip full site</button>
+        </div>
+        <div class="filezone">clones html, css, js, images, fonts – all assets</div>
+      </div>
+
+      <div id="imagepanel" style="display:none;" class="panel">
+        <div class="filezone">
+          <label>upload screenshots (multiple)</label>
+          <input type="file" id="imagefileinput" multiple accept="image/jpeg,image/png,image/webp">
+          <button id="executeimageextract" class="actionbutton">reconstruct pixel‑perfect</button>
+        </div>
+        <div class="filezone" style="background:#fef7e0;">preprocessed ocr + multi‑image stitching</div>
+      </div>
+
+      <div class="advancedoptions" id="advancedoptions" style="display:none;">
+        <h4>advanced settings</h4>
+        <label>proxy url (optional)</label>
+        <input type="text" id="proxyinput" placeholder="https://corsproxy.io/?">
+        <label>custom headers (json)</label>
+        <textarea id="headersinput" rows="2" placeholder='{"User-Agent": "Mozilla/5.0"}'></textarea>
+        <label>cookie jar (json)</label>
+        <textarea id="cookiesinput" rows="2" placeholder='{"name":"value"}'></textarea>
+        <button id="saveadvancedbtn" class="actionbutton smallbtn">save settings</button>
+      </div>
     </div>
 
-    <div id="linkpanel" class="panel">
-      <div class="linkgroup">
-        <input type="text" id="websiteurl" placeholder="https://example.com/article">
-        <button id="executelinkcopy" class="actionbutton">Clone Web</button>
+    <div class="panel right">
+      <div class="previewtitle">output</div>
+      <div class="togglewrapper">
+        <button id="previewviewbtn" class="togglebtn activeview">preview</button>
+        <button id="codeviewbtn" class="togglebtn">source</button>
+        <button id="editorviewbtn" class="togglebtn">editor</button>
       </div>
-      <div class="filezone">axom webcloner | clone website's frontend</div>
-    </div>
-
-    <div id="imagepanel" style="display:none;" class="panel">
-      <div class="filezone">
-        <label>upload website screenshot (jpg, png, webp)</label>
-        <input type="file" id="imagefileinput" accept="image/jpeg,image/png,image/webp">
-        <button id="executeimageextract" class="actionbutton" style="margin-top: 1rem;">clone by image</button>
+      <div id="outputzone" class="outputarea"></div>
+      <div class="editorcontainer" id="editorcontainer" style="display:none;">
+        <textarea id="codeeditor" style="width:100%;height:500px;"></textarea>
+        <div class="editorbar">
+          <button id="minifybtn" class="actionbutton smallbtn">minify</button>
+          <button id="beautifybtn" class="actionbutton smallbtn">beautify</button>
+          <span id="linecount">lines: 0</span>
+        </div>
       </div>
-      <div class="filezone" style="background:#fef7e0;">extracts text, color blocks, gradients, shapes (in by image) </div>
+      <div class="sharezone" id="sharezone" style="display:none;">
+        <span class="sharelabel">share:</span>
+        <input type="text" id="sharelinkinput" readonly class="shareinput">
+        <button id="copysharebtn" class="actionbutton smallbtn">copy</button>
+      </div>
+      <div class="buttonbar">
+        <button id="copyoutputbtn" class="actionbutton">copy html</button>
+        <button id="exportbtn" class="actionbutton">export</button>
+        <button id="previewoutputbtn" class="actionbutton">open</button>
+        <button id="deploybtn" class="actionbutton">deploy</button>
+      </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="previewtitle">output</div>
-    <div class="togglewrapper">
-      <button id="previewviewbtn" class="togglebtn activeview">preview</button>
-      <button id="codeviewbtn" class="togglebtn">source code</button>
-    </div>
-    <div id="outputzone" class="outputarea">
-      <div class="infomessage">select mode and run copy</div>
-    </div>
-    <div class="sharezone" id="sharezone" style="display:none;">
-      <span class="sharelabel">share this clone:</span>
-      <input type="text" id="sharelinkinput" readonly class="shareinput">
-      <button id="copysharebtn" class="actionbutton smallbtn">copy link</button>
-    </div>
-    <div class="buttonbar">
-      <button id="copyoutputbtn" class="actionbutton">copy output</button>
-      <button id="previewoutputbtn" class="actionbutton">open in new tab</button>
-    </div>
+  <div id="historypanel" class="historypanel" style="display:none;">
+    <h3>clone history</h3>
+    <ul id="historylist"></ul>
+    <button id="clearhistorybtn" class="actionbutton smallbtn">clear all</button>
   </div>
 </div>
+
+<script src="utils.js"></script>
+<script src="cache.js"></script>
+<script src="assetclone.js"></script>
+<script src="history.js"></script>
+<script src="settings.js"></script>
+<script src="editor.js"></script>
 <script src="linkclone.js"></script>
 <script src="imageclone.js"></script>
 <script src="main.js"></script>
 </body>
-</html>
+          </html>
