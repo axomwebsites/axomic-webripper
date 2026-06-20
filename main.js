@@ -40,7 +40,13 @@
     exportmodal: document.getElementById('exportmodal'),
     closemodalbtn: document.getElementById('closemodalbtn'),
     confirmexportbtn: document.getElementById('confirmexportbtn'),
-    cancelexportbtn: document.getElementById('cancelexportbtn')
+    cancelexportbtn: document.getElementById('cancelexportbtn'),
+    scanbtn: document.getElementById('scanbtn'),
+    assetsbtn: document.getElementById('assetsbtn'),
+    logbtn: document.getElementById('logbtn'),
+    scanpanel: document.getElementById('scanpanel'),
+    assetspanel: document.getElementById('assetspanel'),
+    logpanel: document.getElementById('logpanel')
   };
   function setmode(mode){
     currentmode = mode;
@@ -239,47 +245,39 @@
     if(window.history) window.history.init();
   });
   if(window.settings) window.settings.load();
+
+  elements.scanbtn.addEventListener('click', function(){
+    let html = window.app.getcurrenthtml();
+    if(!html){ alert('no content to scan'); return; }
+    let threats = window.scanner.scanforthreats(html);
+    let panel = elements.scanpanel;
+    if(threats.length===0){ panel.innerHTML = '<div style="color:green;">no threats found</div>'; }
+    else { panel.innerHTML = '<div style="color:red;">'+threats.map(t=>'• '+t).join('<br>')+'</div>'; }
+    panel.style.display = 'block';
+    elements.assetspanel.style.display = 'none';
+    elements.logpanel.style.display = 'none';
+  });
+  elements.assetsbtn.addEventListener('click', function(){
+    let html = window.app.getcurrenthtml();
+    if(!html){ alert('no content to analyze'); return; }
+    let counts = window.scanner.countassets(html);
+    let panel = elements.assetspanel;
+    panel.innerHTML = '<div>images: '+counts.images+'</div><div>stylesheets: '+counts.styles+'</div><div>scripts: '+counts.scripts+'</div><div>fonts: '+counts.fonts+'</div>';
+    panel.style.display = 'block';
+    elements.scanpanel.style.display = 'none';
+    elements.logpanel.style.display = 'none';
+  });
+  elements.logbtn.addEventListener('click', function(){
+    let panel = elements.logpanel;
+    let log = window.scanner.getlog();
+    if(log.length===0){ panel.innerHTML = 'no requests logged'; }
+    else {
+      panel.innerHTML = log.map(entry=>entry.time+' '+entry.url+' ('+entry.status+')').join('<br>');
+    }
+    panel.style.display = 'block';
+    elements.scanpanel.style.display = 'none';
+    elements.assetspanel.style.display = 'none';
+  });
+
   setmode('link');
 })();
-
-function showScan(){
-  let panel = document.getElementById('scanpanel');
-  let html = window.app.getcurrenthtml();
-  if(!html){ alert('no content to scan'); return; }
-  let threats = window.scanner.scanforthreats(html);
-  if(threats.length===0){
-    panel.innerHTML = '<div style="color:green;">no threats detected</div>';
-  } else {
-    panel.innerHTML = '<div style="color:red;">'+threats.map(t=>'• '+t).join('<br>')+'</div>';
-  }
-  panel.style.display = 'block';
-  document.getElementById('assetspanel').style.display = 'none';
-  document.getElementById('logpanel').style.display = 'none';
-}
-
-function showAssets(){
-  let panel = document.getElementById('assetspanel');
-  let html = window.app.getcurrenthtml();
-  if(!html){ alert('no content to analyze'); return; }
-  let counts = window.scanner.countassets(html);
-  panel.innerHTML = '<div>images: '+counts.images+'</div><div>stylesheets: '+counts.styles+'</div><div>scripts: '+counts.scripts+'</div><div>fonts: '+counts.fonts+'</div>';
-  panel.style.display = 'block';
-  document.getElementById('scanpanel').style.display = 'none';
-  document.getElementById('logpanel').style.display = 'none';
-}
-
-function showLog(){
-  let panel = document.getElementById('logpanel');
-  let log = window.scanner.getlog();
-  if(log.length===0){ panel.innerHTML = 'no requests logged'; }
-  else {
-    panel.innerHTML = log.map(entry=>entry.time+' '+entry.url+' ('+entry.status+')').join('<br>');
-  }
-  panel.style.display = 'block';
-  document.getElementById('scanpanel').style.display = 'none';
-  document.getElementById('assetspanel').style.display = 'none';
-}
-
-document.getElementById('scanbtn').addEventListener('click', showScan);
-document.getElementById('assetsbtn').addEventListener('click', showAssets);
-document.getElementById('logbtn').addEventListener('click', showLog);
