@@ -32,7 +32,13 @@
       if(!url.startsWith('http')) url = 'https://'+url;
       let settings = window.settings ? window.settings.get() : { proxy:'', headers:{} };
       try{
-        let base = await window.assetclone.clonefullsite(url, settings);
+        let base;
+        if(window.assetclone && typeof window.assetclone.clonefullsite === 'function'){
+          base = await window.assetclone.clonefullsite(url, settings);
+        } else {
+          window.app.showerror('assetclone not available');
+          return;
+        }
         let results = [
           generateMethodA(base),
           generateMethodB(base),
