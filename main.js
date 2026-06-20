@@ -244,28 +244,49 @@
   if(window.settings) window.settings.load();
 
   elements.scanbtn.addEventListener('click', function(){
+    let panel = elements.scanpanel;
+    if(panel.style.display === 'block'){
+      panel.style.display = 'none';
+      return;
+    }
     let html = window.app.getcurrenthtml();
     if(!html){ alert('no content to scan'); return; }
     let threats = window.scanner.scanforthreats(html);
-    let panel = elements.scanpanel;
-    if(threats.length===0){ panel.innerHTML = '<div style="color:green;">no threats found</div>'; }
-    else { panel.innerHTML = '<div style="color:red;">'+threats.map(t=>'• '+t).join('<br>')+'</div>'; }
+    if(threats.length===0){
+      panel.innerHTML = '<div style="color:green;">no threats found</div>';
+    } else {
+      panel.innerHTML = '<div style="color:red;">'+threats.map(t=>'• '+t).join('<br>')+'</div>';
+    }
     panel.style.display = 'block';
     elements.assetspanel.style.display = 'none';
     elements.logpanel.style.display = 'none';
   });
+
   elements.assetsbtn.addEventListener('click', function(){
+    let panel = elements.assetspanel;
+    if(panel.style.display === 'block'){
+      panel.style.display = 'none';
+      return;
+    }
     let html = window.app.getcurrenthtml();
     if(!html){ alert('no content to analyze'); return; }
-    let counts = window.scanner.countassets(html);
-    let panel = elements.assetspanel;
-    panel.innerHTML = '<div>images: '+counts.images+'</div><div>stylesheets: '+counts.styles+'</div><div>scripts: '+counts.scripts+'</div><div>fonts: '+counts.fonts+'</div>';
+    let assets = window.scanner.getassets(html);
+    if(assets.length===0){
+      panel.innerHTML = 'no assets found';
+    } else {
+      panel.innerHTML = assets.map(a=>'• '+a).join('<br>');
+    }
     panel.style.display = 'block';
     elements.scanpanel.style.display = 'none';
     elements.logpanel.style.display = 'none';
   });
+
   elements.logbtn.addEventListener('click', function(){
     let panel = elements.logpanel;
+    if(panel.style.display === 'block'){
+      panel.style.display = 'none';
+      return;
+    }
     let log = window.scanner.getlog();
     if(log.length===0){ panel.innerHTML = 'no requests logged'; }
     else {
