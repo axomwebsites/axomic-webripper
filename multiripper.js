@@ -9,19 +9,21 @@
     let labels = ['A','B','C','D'];
     for(let i=0; i<results.length; i++){
       let card = document.createElement('div');
-      card.style.cssText = 'flex:1;min-width:200px;border:1px solid #ccc;padding:0.5rem;border-radius:0.5rem;cursor:pointer;';
-      card.innerHTML = `<h4>method ${labels[i]}</h4><iframe srcdoc="${escapehtml(results[i])}" style="width:100%;height:200px;border:none;"></iframe>`;
+      card.style.cssText = 'flex:1;min-width:200px;border:1px solid #ccc;padding:0.5rem;border-radius:0.5rem;cursor:pointer;background:#fafafa;';
+      card.innerHTML = `<h4>method ${labels[i]}</h4><iframe srcdoc="${escapehtml(results[i])}" style="width:100%;height:200px;border:none;background:white;"></iframe>`;
       card.addEventListener('click', ()=>{
         window.app.setcurrenthtml(results[i], null);
+        alert('selected method '+labels[i]);
       });
       container.appendChild(card);
     }
     let wrapper = document.createElement('div');
-    wrapper.innerHTML = `<div style="padding:1rem;"><h3>choose a result (click)</h3></div>`;
+    wrapper.innerHTML = `<div style="padding:1rem;font-weight:bold;">click a card to use that version</div>`;
     wrapper.appendChild(container);
     return wrapper.innerHTML;
   }
   function escapehtml(str){ return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   window.multiripper = {
     link: async function(){
       window.app.showloading();
