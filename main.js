@@ -22,6 +22,7 @@
     historytogglebtn: document.getElementById('historytogglebtn'),
     settingstogglebtn: document.getElementById('settingstogglebtn'),
     historypanel: document.getElementById('historypanel'),
+    closehistorybtn: document.getElementById('closehistorybtn'),
     advancedoptions: document.getElementById('advancedoptions'),
     proxyinput: document.getElementById('proxyinput'),
     headersinput: document.getElementById('headersinput'),
@@ -34,7 +35,12 @@
     codeeditor: document.getElementById('codeeditor'),
     minifybtn: document.getElementById('minifybtn'),
     beautifybtn: document.getElementById('beautifybtn'),
-    linecount: document.getElementById('linecount')
+    linecount: document.getElementById('linecount'),
+    rippermode: document.getElementById('rippermode'),
+    exportmodal: document.getElementById('exportmodal'),
+    closemodalbtn: document.getElementById('closemodalbtn'),
+    confirmexportbtn: document.getElementById('confirmexportbtn'),
+    cancelexportbtn: document.getElementById('cancelexportbtn')
   };
   function setmode(mode){
     currentmode = mode;
@@ -151,10 +157,16 @@
     else showerror('popup blocked');
   });
   elements.executelinkcopy.addEventListener('click', ()=>{
-    if(currentmode==='link') window.linkcloneprocess();
+    if(currentmode==='link') {
+      if(elements.rippermode.value==='direct') window.linkcloneprocess();
+      else window.multiripper.link();
+    }
   });
   elements.executeimageextract.addEventListener('click', ()=>{
-    if(currentmode==='images') window.imagecloneprocess();
+    if(currentmode==='images') {
+      if(elements.rippermode.value==='direct') window.imagecloneprocess();
+      else window.multiripper.image();
+    }
   });
   let darkmode = localStorage.getItem('darkmode')==='true';
   function applytheme(){ document.body.classList.toggle('dark', darkmode); }
@@ -168,6 +180,9 @@
     let panel = elements.historypanel;
     panel.style.display = panel.style.display==='none' ? 'block' : 'none';
     if(panel.style.display==='block') window.history.render(elements.historylist);
+  });
+  elements.closehistorybtn.addEventListener('click', ()=>{
+    elements.historypanel.style.display = 'none';
   });
   elements.clearhistorybtn.addEventListener('click', ()=>{
     window.history.clear();
@@ -188,14 +203,37 @@
   });
   elements.exportbtn.addEventListener('click', ()=>{
     if(!currenthtml){ showerror('nothing to export'); return; }
-    let blob = new Blob([currenthtml], {type:'text/html'});
-    let a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'clone.html';
-    a.click();
+    elements.exportmodal.style.display = 'flex';
+  });
+  elements.closemodalbtn.addEventListener('click', ()=>{
+    elements.exportmodal.style.display = 'none';
+  });
+  elements.cancelexportbtn.addEventListener('click', ()=>{
+    elements.exportmodal.style.display = 'none';
+  });
+  elements.confirmexportbtn.addEventListener('click', ()=>{
+    let opt = document.querySelector('input[name="exportopt"]:checked');
+    if(!opt) return;
+    let val = opt.value;
+    if(val==='html'){
+      let blob = new Blob([currenthtml], {type:'text/html'});
+      let a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'clone.html';
+      a.click();
+    } else if(val==='zip'){
+      alert('zip export not fully implemented; use html and compress manually');
+    } else if(val==='copy'){
+      navigator.clipboard.writeText(currenthtml).then(()=>alert('copied'));
+    } else if(val==='save'){
+      let url = document.getElementById('websiteurl').value || 'unknown';
+      window.history.add(url, currenthtml);
+      alert('saved to history');
+    }
+    elements.exportmodal.style.display = 'none';
   });
   elements.deploybtn.addEventListener('click', ()=>{
-    alert('deploy via netlify/vercel api not implemented, but you can export and host manually');
+    alert('deploy via netlify/vercel api not implemented');
   });
   document.addEventListener('DOMContentLoaded', ()=>{
     if(window.history) window.history.init();
