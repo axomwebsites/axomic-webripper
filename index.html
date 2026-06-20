@@ -15,6 +15,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchtags.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-minifier/4.0.0/htmlminifier.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -26,31 +28,34 @@
       <button id="settingstogglebtn" class="iconbtn">⚙️</button>
     </div>
   </header>
-
   <div class="mainrow">
     <div class="panel left">
       <div class="moderow">
         <button id="linkmodebtn" class="modebutton active">by link</button>
         <button id="imagemodebtn" class="modebutton">by images</button>
       </div>
-
+      <div class="rippermode">
+        <label>ripper mode</label>
+        <select id="rippermode">
+          <option value="direct">Direct Ripper</option>
+          <option value="multi">Multi Ripper Result</option>
+        </select>
+      </div>
       <div id="linkpanel" class="panel">
         <div class="linkgroup">
           <input type="text" id="websiteurl" placeholder="https://example.com">
           <button id="executelinkcopy" class="actionbutton">rip full site</button>
         </div>
-        <div class="filezone">clones html, css, js, images, fonts – all assets</div>
+        <div class="filezone">rips the website with frontend, assests,etc</div>
       </div>
-
       <div id="imagepanel" style="display:none;" class="panel">
         <div class="filezone">
           <label>upload screenshots (multiple)</label>
           <input type="file" id="imagefileinput" multiple accept="image/jpeg,image/png,image/webp">
-          <button id="executeimageextract" class="actionbutton">reconstruct pixel‑perfect</button>
+          <button id="executeimageextract" class="actionbutton">clone html</button>
         </div>
-        <div class="filezone" style="background:#fef7e0;">preprocessed ocr + multi‑image stitching</div>
+        <div class="filezone" style="background:#fef7e0;">rip by image</div>
       </div>
-
       <div class="advancedoptions" id="advancedoptions" style="display:none;">
         <h4>advanced settings</h4>
         <label>proxy url (optional)</label>
@@ -62,7 +67,6 @@
         <button id="saveadvancedbtn" class="actionbutton smallbtn">save settings</button>
       </div>
     </div>
-
     <div class="panel right">
       <div class="previewtitle">output</div>
       <div class="togglewrapper">
@@ -88,15 +92,36 @@
         <button id="copyoutputbtn" class="actionbutton">copy html</button>
         <button id="exportbtn" class="actionbutton">export</button>
         <button id="previewoutputbtn" class="actionbutton">open</button>
-        <button id="deploybtn" class="actionbutton">deploy</button>
+        <button id="deploybtn" class="actionbutton">deploy (under development)</button>
       </div>
     </div>
   </div>
-
   <div id="historypanel" class="historypanel" style="display:none;">
-    <h3>clone history</h3>
+    <div class="historyheader">
+      <h3>clone history</h3>
+      <button id="closehistorybtn" class="closebtn">✕</button>
+    </div>
     <ul id="historylist"></ul>
     <button id="clearhistorybtn" class="actionbutton smallbtn">clear all</button>
+  </div>
+</div>
+
+<div id="exportmodal" class="modal" style="display:none;">
+  <div class="modalcontent">
+    <div class="modalheader">
+      <h3>export options</h3>
+      <button id="closemodalbtn" class="closebtn">✕</button>
+    </div>
+    <div class="modalbody">
+      <label><input type="radio" name="exportopt" value="html" checked> download html</label>
+      <label><input type="radio" name="exportopt" value="zip"> download zip (with assets)</label>
+      <label><input type="radio" name="exportopt" value="copy"> copy to clipboard</label>
+      <label><input type="radio" name="exportopt" value="save"> save to history</label>
+    </div>
+    <div class="modalfooter">
+      <button id="confirmexportbtn" class="actionbutton">confirm</button>
+      <button id="cancelexportbtn" class="actionbutton smallbtn">cancel</button>
+    </div>
   </div>
 </div>
 
@@ -108,6 +133,7 @@
 <script src="editor.js"></script>
 <script src="linkclone.js"></script>
 <script src="imageclone.js"></script>
+<script src="multiripper.js"></script>
 <script src="main.js"></script>
 </body>
-          </html>
+</html>
