@@ -19,10 +19,7 @@
     sharelinkinput: document.getElementById('sharelinkinput'),
     copysharebtn: document.getElementById('copysharebtn'),
     darkmodebtn: document.getElementById('darkmodebtn'),
-    historytogglebtn: document.getElementById('historytogglebtn'),
     settingstogglebtn: document.getElementById('settingstogglebtn'),
-    historypanel: document.getElementById('historypanel'),
-    closehistorybtn: document.getElementById('closehistorybtn'),
     advancedoptions: document.getElementById('advancedoptions'),
     proxyinput: document.getElementById('proxyinput'),
     headersinput: document.getElementById('headersinput'),
@@ -30,8 +27,6 @@
     saveadvancedbtn: document.getElementById('saveadvancedbtn'),
     exportbtn: document.getElementById('exportbtn'),
     deploybtn: document.getElementById('deploybtn'),
-    historylist: document.getElementById('historylist'),
-    clearhistorybtn: document.getElementById('clearhistorybtn'),
     codeeditor: document.getElementById('codeeditor'),
     minifybtn: document.getElementById('minifybtn'),
     beautifybtn: document.getElementById('beautifybtn'),
@@ -143,7 +138,6 @@
         let shareurl = baseurl + '#' + encodeURIComponent(sourceurl);
         elements.sharelinkinput.value = shareurl;
         elements.sharezone.style.display = 'flex';
-        window.clonehistory.add(sourceurl, html);
       } else {
         elements.sharezone.style.display = 'none';
       }
@@ -182,18 +176,6 @@
     applytheme();
   });
   applytheme();
-  elements.historytogglebtn.addEventListener('click', ()=>{
-    let panel = elements.historypanel;
-    panel.style.display = panel.style.display==='none' ? 'block' : 'none';
-    if(panel.style.display==='block') window.clonehistory.render(elements.historylist);
-  });
-  elements.closehistorybtn.addEventListener('click', ()=>{
-    elements.historypanel.style.display = 'none';
-  });
-  elements.clearhistorybtn.addEventListener('click', ()=>{
-    window.clonehistory.clear();
-    elements.historypanel.style.display = 'none';
-  });
   elements.settingstogglebtn.addEventListener('click', ()=>{
     let adv = elements.advancedoptions;
     adv.style.display = adv.style.display==='none' ? 'block' : 'none';
@@ -231,10 +213,6 @@
       alert('zip export not fully implemented; use html and compress manually');
     } else if(val==='copy'){
       navigator.clipboard.writeText(currenthtml).then(()=>alert('copied'));
-    } else if(val==='save'){
-      let url = document.getElementById('websiteurl').value || 'unknown';
-      window.clonehistory.add(url, currenthtml);
-      alert('saved to history');
     }
     elements.exportmodal.style.display = 'none';
   });
@@ -262,9 +240,6 @@
     } catch(e){
       showerror('deploy failed: '+e.message);
     }
-  });
-  document.addEventListener('DOMContentLoaded', ()=>{
-    if(window.clonehistory) window.clonehistory.init();
   });
   if(window.settings) window.settings.load();
 
