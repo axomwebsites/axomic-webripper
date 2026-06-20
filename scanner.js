@@ -11,21 +11,40 @@
       if(s.match(/onload\s*=/i)) threats.push('onload handler');
     }
     let external = html.match(/src\s*=\s*['"]https?:\/\/[^'"]+['"]/gi) || [];
-    if(external.length) threats.push(external.length+' external resources');
+    if(external.length) threats.push(external.length+' external resources found');
     return threats;
   }
-  function countassets(html){
-    let images = html.match(/<img[^>]*src=["']/gi) || [];
-    let styles = html.match(/<link[^>]*rel=["']stylesheet["']/gi) || [];
-    let scripts = html.match(/<script[^>]*src=["']/gi) || [];
-    let fonts = html.match(/@font-face/gi) || [];
-    return { images: images.length, styles: styles.length, scripts: scripts.length, fonts: fonts.length };
+
+  function getassets(html){
+    let assets = [];
+    let imgmatches = html.match(/<img[^>]*src=["']([^"']+)["']/gi) || [];
+    for(let m of imgmatches){
+      let src = m.match(/src=["']([^"']+)["']/);
+      if(src) assets.push('image: '+src[1]);
+    }
+    let cssmatches = html.match(/<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi) || [];
+    for(let m of cssmatches){
+      let href = m.match(/href=["']([^"']+)["']/);
+      if(href) assets.push('stylesheet: '+href[1]);
+    }
+    let scriptmatches = html.match(/<script[^>]*src=["']([^"']+)["']/gi) || [];
+    for(let m of scriptmatches){
+      let src = m.match(/src=["']([^"']+)["']/);
+      if(src) assets.push('script: '+src[1]);
+    }
+    let fontmatches = html.match(/@font-face\s*{[^}]*}/gi) || [];
+    for(let m of fontmatches){
+      let url = m.match(/url\(["']?([^"')]+)["']?\)/);
+      if(url) assets.push('font: '+url[1]);
+    }
+    return assets;
   }
+
   let requestlog = [];
   function addrequest(url, status){
     requestlog.push({url, status, time: new Date().toLocaleString()});
     if(requestlog.length>100) requestlog.shift();
   }
   function getlog(){ return requestlog; }
-  window.scanner = { scanforthreats, countassets, addrequest, getlog };
+  window.scanner = { scanforthreats, getassets, addrequest, getlog };
 })();
