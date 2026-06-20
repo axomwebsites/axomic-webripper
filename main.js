@@ -238,8 +238,27 @@
     }
     elements.exportmodal.style.display = 'none';
   });
-  elements.deploybtn.addEventListener('click', ()=>{
-    alert('deploy via netlify/vercel api not implemented');
+  elements.deploybtn.addEventListener('click', async function(){
+    let html = window.app.getcurrenthtml();
+    if(!html){ showerror('nothing to deploy'); return; }
+    if(typeof puter === 'undefined'){ showerror('puter.js not loaded'); return; }
+    try{
+      showloading();
+      let dirName = puter.randName();
+      await puter.fs.mkdir(dirName);
+      await puter.fs.write(dirName + '/index.html', html);
+      let subdomain = puter.randName();
+      let site = await puter.hosting.create(subdomain, dirName);
+      let url = 'https://' + site.subdomain + '.puter.site';
+      let msg = document.createElement('div');
+      msg.style.cssText = 'padding:1rem;text-align:center;';
+      msg.innerHTML = 'deployed: <a href="'+url+'" target="_blank">'+url+'</a>';
+      elements.outputzone.innerHTML = '';
+      elements.outputzone.appendChild(msg);
+      alert('deployed at '+url);
+    } catch(e){
+      showerror('deploy failed: '+e.message);
+    }
   });
   document.addEventListener('DOMContentLoaded', ()=>{
     if(window.history) window.history.init();
