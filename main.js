@@ -241,7 +241,10 @@
   elements.deploybtn.addEventListener('click', async function(){
     let html = window.app.getcurrenthtml();
     if(!html){ showerror('nothing to deploy'); return; }
-    if(typeof puter === 'undefined'){ showerror('puter.js not loaded'); return; }
+    if(typeof puter === 'undefined'){
+      showerror('Puter.js not loaded. Please refresh the page or check your internet connection.');
+      return;
+    }
     try{
       showloading();
       let dirName = puter.randName();
