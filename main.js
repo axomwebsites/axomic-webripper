@@ -241,3 +241,45 @@
   if(window.settings) window.settings.load();
   setmode('link');
 })();
+
+function showScan(){
+  let panel = document.getElementById('scanpanel');
+  let html = window.app.getcurrenthtml();
+  if(!html){ alert('no content to scan'); return; }
+  let threats = window.scanner.scanforthreats(html);
+  if(threats.length===0){
+    panel.innerHTML = '<div style="color:green;">no threats detected</div>';
+  } else {
+    panel.innerHTML = '<div style="color:red;">'+threats.map(t=>'• '+t).join('<br>')+'</div>';
+  }
+  panel.style.display = 'block';
+  document.getElementById('assetspanel').style.display = 'none';
+  document.getElementById('logpanel').style.display = 'none';
+}
+
+function showAssets(){
+  let panel = document.getElementById('assetspanel');
+  let html = window.app.getcurrenthtml();
+  if(!html){ alert('no content to analyze'); return; }
+  let counts = window.scanner.countassets(html);
+  panel.innerHTML = '<div>images: '+counts.images+'</div><div>stylesheets: '+counts.styles+'</div><div>scripts: '+counts.scripts+'</div><div>fonts: '+counts.fonts+'</div>';
+  panel.style.display = 'block';
+  document.getElementById('scanpanel').style.display = 'none';
+  document.getElementById('logpanel').style.display = 'none';
+}
+
+function showLog(){
+  let panel = document.getElementById('logpanel');
+  let log = window.scanner.getlog();
+  if(log.length===0){ panel.innerHTML = 'no requests logged'; }
+  else {
+    panel.innerHTML = log.map(entry=>entry.time+' '+entry.url+' ('+entry.status+')').join('<br>');
+  }
+  panel.style.display = 'block';
+  document.getElementById('scanpanel').style.display = 'none';
+  document.getElementById('assetspanel').style.display = 'none';
+}
+
+document.getElementById('scanbtn').addEventListener('click', showScan);
+document.getElementById('assetsbtn').addEventListener('click', showAssets);
+document.getElementById('logbtn').addEventListener('click', showLog);
