@@ -6,6 +6,7 @@
     }
     let headers = settings.headers || {};
     let resp = await fetch(finalurl, { headers });
+    if(window.scanner) window.scanner.addrequest(url, resp.status);
     if(!resp.ok) throw new Error('fetch failed for '+url);
     let content = await resp.text();
     return content;
@@ -17,6 +18,7 @@
     }
     let headers = settings.headers || {};
     let resp = await fetch(finalurl, { headers });
+    if(window.scanner) window.scanner.addrequest(url, resp.status);
     if(!resp.ok) throw new Error('fetch blob failed');
     return await resp.blob();
   }
