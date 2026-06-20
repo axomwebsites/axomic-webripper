@@ -144,3 +144,4 @@ body { position:relative; width:100%; min-height:100vh; background:#f0f2f5; }
     }
   };
 })();
+window.imageclone = { reconstructfromfile };
