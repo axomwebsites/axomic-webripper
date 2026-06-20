@@ -25,7 +25,6 @@
     <h1>axomic webripper</h1>
     <div class="controls">
       <button id="darkmodebtn" class="iconbtn">🌙</button>
-      <button id="historytogglebtn" class="iconbtn">📋</button>
       <button id="settingstogglebtn" class="iconbtn">⚙️</button>
     </div>
   </header>
@@ -105,14 +104,6 @@
       </div>
     </div>
   </div>
-  <div id="historypanel" class="historypanel" style="display:none;">
-    <div class="historyheader">
-      <h3>clone history</h3>
-      <button id="closehistorybtn" class="closebtn">✕</button>
-    </div>
-    <ul id="historylist"></ul>
-    <button id="clearhistorybtn" class="actionbutton smallbtn">clear all</button>
-  </div>
 </div>
 
 <div id="exportmodal" class="modal" style="display:none;">
@@ -125,7 +116,6 @@
       <label><input type="radio" name="exportopt" value="html" checked> download html</label>
       <label><input type="radio" name="exportopt" value="zip"> download zip (with assets)</label>
       <label><input type="radio" name="exportopt" value="copy"> copy to clipboard</label>
-      <label><input type="radio" name="exportopt" value="save"> save to history</label>
     </div>
     <div class="modalfooter">
       <button id="confirmexportbtn" class="actionbutton">confirm</button>
@@ -138,7 +128,6 @@
 <script src="cache.js"></script>
 <script src="scanner.js"></script>
 <script src="assetclone.js"></script>
-<script src="history.js"></script>
 <script src="settings.js"></script>
 <script src="editor.js"></script>
 <script src="linkclone.js"></script>
