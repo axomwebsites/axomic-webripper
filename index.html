@@ -46,15 +46,15 @@
           <input type="text" id="websiteurl" placeholder="https://example.com">
           <button id="executelinkcopy" class="actionbutton">rip full site</button>
         </div>
-        <div class="filezone">rips the website with frontend, assests,etc</div>
+        <div class="filezone">FULL RIPPER</div>
       </div>
       <div id="imagepanel" style="display:none;" class="panel">
         <div class="filezone">
           <label>upload screenshots (multiple)</label>
           <input type="file" id="imagefileinput" multiple accept="image/jpeg,image/png,image/webp">
-          <button id="executeimageextract" class="actionbutton">clone html</button>
+          <button id="executeimageextract" class="actionbutton">clone</button>
         </div>
-        <div class="filezone" style="background:#fef7e0;">rip by image</div>
+        <div class="filezone" style="background:#fef7e0;">clone by image</div>
       </div>
       <div class="advancedoptions" id="advancedoptions" style="display:none;">
         <h4>advanced settings</h4>
@@ -66,6 +66,14 @@
         <textarea id="cookiesinput" rows="2" placeholder='{"name":"value"}'></textarea>
         <button id="saveadvancedbtn" class="actionbutton smallbtn">save settings</button>
       </div>
+      <div class="actionrow">
+        <button id="scanbtn" class="actionbutton smallbtn">scan for threats</button>
+        <button id="assetsbtn" class="actionbutton smallbtn">show assets</button>
+        <button id="logbtn" class="actionbutton smallbtn">show request log</button>
+      </div>
+      <div id="scanpanel" style="display:none; background:var(--bg); padding:0.5rem; border-radius:0.5rem; margin-top:0.5rem;"></div>
+      <div id="assetspanel" style="display:none; background:var(--bg); padding:0.5rem; border-radius:0.5rem; margin-top:0.5rem;"></div>
+      <div id="logpanel" style="display:none; background:var(--bg); padding:0.5rem; border-radius:0.5rem; margin-top:0.5rem; max-height:200px; overflow-y:auto; font-size:0.8rem;"></div>
     </div>
     <div class="panel right">
       <div class="previewtitle">output</div>
@@ -92,7 +100,7 @@
         <button id="copyoutputbtn" class="actionbutton">copy html</button>
         <button id="exportbtn" class="actionbutton">export</button>
         <button id="previewoutputbtn" class="actionbutton">open</button>
-        <button id="deploybtn" class="actionbutton">deploy (under development)</button>
+        <button id="deploybtn" class="actionbutton">deploy</button>
       </div>
     </div>
   </div>
@@ -128,6 +136,7 @@
 <script src="utils.js"></script>
 <script src="cache.js"></script>
 <script src="assetclone.js"></script>
+<script src="scanner.js"></script>
 <script src="history.js"></script>
 <script src="settings.js"></script>
 <script src="editor.js"></script>
@@ -136,4 +145,4 @@
 <script src="multiripper.js"></script>
 <script src="main.js"></script>
 </body>
-</html>
+  </html>
