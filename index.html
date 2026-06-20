@@ -6,6 +6,7 @@
   <title>axomic webripper</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <script src="https://js.puter.com/v2/"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@vibrant/color@4.4.2/dist/vibrant.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
@@ -40,13 +41,20 @@
           <option value="direct">Direct Ripper</option>
           <option value="multi">Multi Ripper Result</option>
         </select>
+        <label style="margin-left:1rem;">method</label>
+        <select id="methodselect">
+          <option value="A">Method A</option>
+          <option value="B">Method B</option>
+          <option value="C">Method C</option>
+          <option value="D">Method D</option>
+        </select>
       </div>
       <div id="linkpanel" class="panel">
         <div class="linkgroup">
           <input type="text" id="websiteurl" placeholder="https://example.com">
           <button id="executelinkcopy" class="actionbutton">rip full site</button>
         </div>
-        <div class="filezone">FULL RIPPER</div>
+        <div class="filezone">clones html, css, js, images, fonts – all assets</div>
       </div>
       <div id="imagepanel" style="display:none;" class="panel">
         <div class="filezone">
@@ -132,7 +140,7 @@
     </div>
   </div>
 </div>
-  
+
 <script src="utils.js"></script>
 <script src="cache.js"></script>
 <script src="scanner.js"></script>
