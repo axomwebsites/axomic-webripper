@@ -1,13 +1,12 @@
 (function(){
   function minifycode(html){
-    return html.replace(/\s{2,}/g,' ').replace(/\n/g,'').replace(/<!--[\s\S]*?-->/g,'');
+    try{
+      return htmlMinifier.minify(html, { collapseWhitespace: true, removeComments: true });
+    } catch(e){ return html; }
   }
   function beautifycode(html){
     try{
-      let parser = new DOMParser();
-      let doc = parser.parseFromString(html, 'text/html');
-      let serializer = new XMLSerializer();
-      return serializer.serializeToString(doc);
+      return html_beautify(html, { indent_size: 2 });
     } catch(e){ return html; }
   }
   document.addEventListener('DOMContentLoaded', ()=>{
