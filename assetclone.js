@@ -32,30 +32,20 @@
     }
   ];
 
-  async function fetchwithproxy(url, settings){
-    let finalurl = url;
-    if(settings.proxy && settings.proxy.trim()!==''){
-      finalurl = settings.proxy + encodeURIComponent(url);
-    }
-    let headers = settings.headers || {};
-    let resp = await fetch(finalurl, { headers });
-    if(window.scanner) window.scanner.addrequest(url, resp.status);
-    if(!resp.ok) throw new Error('fetch failed for '+url);
-    let content = await resp.text();
-    return content;
-  }
-
   async function fetchwithfallback(url, settings){
     if(settings.proxy && settings.proxy.trim()!==''){
-      return await fetchwithproxy(url, settings);
+      let finalurl = settings.proxy + encodeURIComponent(url);
+      let headers = settings.headers || {};
+      let resp = await fetch(finalurl, { headers });
+      if(window.scanner) window.scanner.addrequest(url, resp.status);
+      if(!resp.ok) throw new Error('fetch failed for '+url);
+      return await resp.text();
     }
     for(let i=0; i<proxylist.length; i++){
       try{
         let html = await proxylist[i](url);
         if(html && html.length > 100) return html;
-      } catch(e){
-        continue;
-      }
+      } catch(e){ continue; }
     }
     throw new Error('all proxy methods failed');
   }
@@ -81,14 +71,27 @@
     });
   }
 
-  async function clonefullsite(url, settings){
+  function applymethod(html, method){
+    if(method==='A') return html;
+    if(method==='B') return html.replace(/<div/g,'<section').replace(/<\/div>/g,'</section>');
+    if(method==='C') return html.replace(/<p/g,'<div').replace(/<\/p>/g,'</div>');
+    if(method==='D') return html.replace(/class="([^"]*)"/g,'style="border:1px solid red;"');
+    return html;
+  }
+
+  async function clonefullsite(url, settings, method){
     let html = await fetchwithfallback(url, settings);
     let doc = new DOMParser().parseFromString(html, 'text/html');
     let base = doc.createElement('base');
     base.setAttribute('href', url);
     doc.head.prepend(base);
-    let imgs = doc.querySelectorAll('img');
-    for(let img of imgs){
+    let imgs = Array.from(doc.querySelectorAll('img'));
+    let styles = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'));
+    let scripts = Array.from(doc.querySelectorAll('script[src]'));
+    let fontlinks = Array.from(doc.querySelectorAll('link[href*="fonts.googleapis.com"]'));
+    let allstyles = Array.from(doc.querySelectorAll('[style]'));
+
+    await Promise.all(imgs.map(async (img) => {
       if(img.src && !img.src.startsWith('data:')){
         try{
           let absurl = new URL(img.src, url).href;
@@ -97,9 +100,9 @@
           img.src = b64;
         } catch(e){}
       }
-    }
-    let styles = doc.querySelectorAll('link[rel="stylesheet"]');
-    for(let link of styles){
+    }));
+
+    await Promise.all(styles.map(async (link) => {
       if(link.href){
         try{
           let absurl = new URL(link.href, url).href;
@@ -109,9 +112,9 @@
           link.replaceWith(style);
         } catch(e){}
       }
-    }
-    let scripts = doc.querySelectorAll('script[src]');
-    for(let scr of scripts){
+    }));
+
+    await Promise.all(scripts.map(async (scr) => {
       if(scr.src){
         try{
           let absurl = new URL(scr.src, url).href;
@@ -121,9 +124,9 @@
           scr.replaceWith(newscr);
         } catch(e){}
       }
-    }
-    let fontlinks = doc.querySelectorAll('link[href*="fonts.googleapis.com"]');
-    for(let link of fontlinks){
+    }));
+
+    await Promise.all(fontlinks.map(async (link) => {
       try{
         let absurl = new URL(link.href, url).href;
         let css = await fetchwithfallback(absurl, settings);
@@ -131,9 +134,9 @@
         style.textContent = css;
         link.replaceWith(style);
       } catch(e){}
-    }
-    let allstyles = doc.querySelectorAll('[style]');
-    for(let el of allstyles){
+    }));
+
+    await Promise.all(allstyles.map(async (el) => {
       let style = el.getAttribute('style');
       let urls = style.match(/url\(['"]?([^'"()]+)['"]?\)/g);
       if(urls){
@@ -151,9 +154,11 @@
         }
         el.setAttribute('style', style);
       }
-    }
-    return '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+    }));
+
+    let raw = '<!DOCTYPE html>' + doc.documentElement.outerHTML;
+    return applymethod(raw, method);
   }
 
-  window.assetclone = { clonefullsite };
+  window.assetclone = { clonefullsite, applymethod };
 })();
