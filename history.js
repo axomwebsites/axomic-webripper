@@ -1,22 +1,22 @@
 (function(){
-  let history = [];
+  let historydata = [];
   function init(){
     let stored = localStorage.getItem('axomichistory');
-    if(stored) history = JSON.parse(stored);
+    if(stored) historydata = JSON.parse(stored);
   }
   function add(url, html){
     let entry = { url, html, timestamp: Date.now() };
-    history.unshift(entry);
-    if(history.length>50) history.pop();
-    localStorage.setItem('axomichistory', JSON.stringify(history));
+    historydata.unshift(entry);
+    if(historydata.length>50) historydata.pop();
+    localStorage.setItem('axomichistory', JSON.stringify(historydata));
   }
   function clear(){
-    history = [];
+    historydata = [];
     localStorage.removeItem('axomichistory');
   }
   function render(listelement){
     listelement.innerHTML = '';
-    for(let entry of history){
+    for(let entry of historydata){
       let li = document.createElement('li');
       li.textContent = entry.url + ' ('+new Date(entry.timestamp).toLocaleString()+')';
       li.addEventListener('click', ()=>{
@@ -26,5 +26,5 @@
       listelement.appendChild(li);
     }
   }
-  window.history = { init, add, clear, render };
+  window.clonehistory = { init, add, clear, render };
 })();
