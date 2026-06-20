@@ -143,7 +143,7 @@
         let shareurl = baseurl + '#' + encodeURIComponent(sourceurl);
         elements.sharelinkinput.value = shareurl;
         elements.sharezone.style.display = 'flex';
-        window.history.add(sourceurl, html);
+        window.clonehistory.add(sourceurl, html);
       } else {
         elements.sharezone.style.display = 'none';
       }
@@ -185,13 +185,13 @@
   elements.historytogglebtn.addEventListener('click', ()=>{
     let panel = elements.historypanel;
     panel.style.display = panel.style.display==='none' ? 'block' : 'none';
-    if(panel.style.display==='block') window.history.render(elements.historylist);
+    if(panel.style.display==='block') window.clonehistory.render(elements.historylist);
   });
   elements.closehistorybtn.addEventListener('click', ()=>{
     elements.historypanel.style.display = 'none';
   });
   elements.clearhistorybtn.addEventListener('click', ()=>{
-    window.history.clear();
+    window.clonehistory.clear();
     elements.historypanel.style.display = 'none';
   });
   elements.settingstogglebtn.addEventListener('click', ()=>{
@@ -233,7 +233,7 @@
       navigator.clipboard.writeText(currenthtml).then(()=>alert('copied'));
     } else if(val==='save'){
       let url = document.getElementById('websiteurl').value || 'unknown';
-      window.history.add(url, currenthtml);
+      window.clonehistory.add(url, currenthtml);
       alert('saved to history');
     }
     elements.exportmodal.style.display = 'none';
@@ -264,7 +264,7 @@
     }
   });
   document.addEventListener('DOMContentLoaded', ()=>{
-    if(window.history) window.history.init();
+    if(window.clonehistory) window.clonehistory.init();
   });
   if(window.settings) window.settings.load();
 
